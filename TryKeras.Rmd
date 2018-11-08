@@ -1,0 +1,66 @@
+---
+title: "Keras"
+author: "ynakahashi"
+date: "2018/11/8"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# install.packages("keras")
+# library(keras)
+# install_keras()
+library(keras)
+```
+
+### MNIST
+*** Load data ***
+```{r}
+mnist <- dataset_mnist()
+# c(c(train_data, train_labels), c(valid_data, valid_labels)) %<-% mnist
+# dim(train_data)
+# dim(train_labels)
+# dim(valid_data)
+# dim(valid_labels)
+```
+
+*** Reshape data ***
+```{r}
+train_images <- mnist$train$x
+train_images <- array_reshape(train_images, c(60000, 28 * 28))
+train_images <- train_images / 255
+
+valid_images <- mnist$test$x
+valid_images <- array_reshape(valid_images, c(10000, 28 * 28))
+valid_images <- valid_images / 255
+
+train_labels <- mnist$train$y
+valid_labels <- mnist$test$y
+train_labels <- to_categorical(train_labels)
+valid_labels <- to_categorical(valid_labels)
+```
+
+*** Define network ***
+```{r}
+model <- keras_model_sequential() %>% 
+   layer_dense(units = 512, activation = "relu", input_shape = c(28 * 28)) %>% 
+   layer_dense(units = 10, activation = "softmax")
+```
+
+*** Compile network ***
+```{r}
+model %>% compile(
+   optimizer = "rmsprop",
+   loss = "categorical_crossentropy",
+   metrics = c("accuracy")
+)
+```
+
+*** Run the model ***
+```{r}
+model %>% fit(train_images, train_labels, epochs = 5, batch_size = 128)
+```
+
